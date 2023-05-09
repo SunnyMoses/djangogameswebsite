@@ -8,7 +8,7 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "^3.10"
 asgiref = "3.6.0"
-django = "3.2"
+django = "3.2.19"
 pytz = "2023.3"
 sqlparse = "0.4.4"
 jwcrypto = "1.2"
