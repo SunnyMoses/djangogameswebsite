@@ -1,6 +1,6 @@
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_exempt
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 import urllib.parse
 import json
 
@@ -25,6 +25,17 @@ def urlencoded_to_json(urlencoded_data):
     return json_data
 
 @csrf_exempt
+def delete_user_view(request, user_id):
+    with open('user_data.json', 'r') as infile:
+        users = json.load(infile)
+        # users['count']-=1
+        users.pop(user_id, None)
+    with open('user_data.json', 'w') as outfile:
+        json.dump(users, outfile, indent=2)
+    return redirect('Home')
+
+
+@csrf_exempt
 def create_user_view(request):
     data = json.loads(urlencoded_to_json(request.body.decode()))
     data = {
@@ -42,13 +53,39 @@ def create_user_view(request):
     with open('user_data.json', 'w') as outfile:
         json.dump(users, outfile, indent=2)
 
+    return redirect('Home')
+
+@csrf_exempt
+def edit_user_view(request, user_id):
+    data = json.loads(urlencoded_to_json(request.body.decode()))
+    data = {
+        'first_name': data['firstname'],
+        'last_name': data['lastname'],
+        'email': data['email'],
+        'phone': data['phone'],
+        'id': user_id,
+    }
+    with open('user_data.json', 'r') as infile:
+        users = json.load(infile)
+    users.pop(user_id, None)
+    users[user_id] = data
+    with open('user_data.json', 'w') as outfile:
+        json.dump(users, outfile, indent=2)
+
+    return redirect('Home')
+
+@csrf_exempt
+def edit_page(request, user_id):
+    with open('user_data.json', 'r') as infile:
+        users = json.load(infile)
+    user1 = users[user_id]
     users = []
     with open('user_data.json', 'r') as infile:
         users_json = json.load(infile)
-        for k,v in users_json.items():
+        for k, v in users_json.items():
             if k != 'count':
                 users.append([v['first_name'], v['last_name'], v['email'], v['phone'], v['id']])
-    return render(request, 'login.html', context={'users': users})
+    return render(request, 'edituser.html', context={'user': user1, 'users': users})
 
 # def list_users_view(request):
 #     context = {}
